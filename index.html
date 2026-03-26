@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Questionario Sanitario Preliminare</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #222;
+      padding: 24px 16px 48px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Avviso giallo ── */
+    .avviso {
+      background: #fff8e1;
+      border: 1.5px solid #f0a500;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #5d4037;
+    }
+    .avviso p + p { margin-top: 10px; }
+    .avviso strong { color: #3e2600; }
+
+    /* ── Box anagrafica ── */
+    .anagrafica {
+      background: #eef4fa;
+      border: 1px solid #c5d8ec;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .anagrafica-row {
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #c5d8ec;
+    }
+    .anagrafica-row:last-child { border-bottom: none; }
+    .campo {
+      flex: 1 1 180px;
+      padding: 12px 16px 10px;
+      border-right: 1px solid #c5d8ec;
+      min-width: 140px;
+    }
+    .campo:last-child { border-right: none; }
+    .campo label {
+      display: block;
+      font-size: 11px;
+      color: #7a9cbf;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .campo input[type="text"],
+    .campo input[type="date"] {
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #aabfd4;
+      background: transparent;
+      font-size: 14px;
+      color: #222;
+      padding: 2px 0 4px;
+      outline: none;
+    }
+    .campo input[type="text"]:focus,
+    .campo input[type="date"]:focus {
+      border-bottom-color: #1a3a5c;
+    }
+    .radio-group {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #222;
+      cursor: pointer;
+      font-weight: 400;
+    }
+    .radio-group input[type="radio"] {
+      accent-color: #1a3a5c;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* ── Titolo ── */
+    .titolo-box {
+      text-align: center;
+    }
+    .titolo-box h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a3a5c;
+      margin-bottom: 4px;
+    }
+    .titolo-box p {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    .separatore {
+      height: 3px;
+      background: #e8a020;
+      border-radius: 2px;
+    }
+
+    /* ── Sezione domande ── */
+    .sezione-titolo {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a3a5c;
+      padding: 10px 0 4px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .domanda-block {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .domanda-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+    }
+    .domanda-row.grigio { background: #f5f5f5; }
+    .domanda-row.bianco { background: #ffffff; }
+
+    .domanda-testo {
+      font-size: 13.5px;
+      line-height: 1.55;
+      flex: 1;
+      color: #222;
+    }
+    .domanda-testo em { color: #555; }
+
+    .si-no {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .si-no label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: #1a3a5c;
+      cursor: pointer;
+      font-weight: 600;
+      border: 1px solid #1a3a5c;
+      border-radius: 5px;
+      padding: 4px 12px;
+      transition: background 0.15s;
+    }
+    .si-no input[type="radio"] { display: none; }
+    .si-no input[type="radio"]:checked + span {
+      /* handled via JS */
+    }
+    .si-no label:has(input:checked) {
+      background: #1a3a5c;
+      color: #fff;
+    }
+
+    .campo-testo-risposta {
+      padding: 6px 16px 14px;
+      background: inherit;
+      border-top: 1px dashed #ddd;
+    }
+    .campo-testo-risposta label {
+      font-size: 11.5px;
+      color: #888;
+      font-style: italic;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .campo-testo-risposta textarea {
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #bbb;
+      background: transparent;
+      font-size: 13px;
+      font-family: inherit;
+      color: #222;
+      resize: none;
+      outline: none;
+      padding: 2px 0;
+      line-height: 1.6;
+      min-height: 44px;
+    }
+    .campo-testo-risposta textarea:focus {
+      border-bottom-color: #1a3a5c;
+    }
+
+    /* ── Griglia sottopunti (patologie) ── */
+    .sottopunti {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Griglia esami ── */
+    .griglia-esami {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border: 1px solid #c5d8ec;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .esame-item {
+      background: #e8f0f8;
+      padding: 7px 10px;
+      font-size: 12.5px;
+      color: #333;
+      border-right: 1px solid #c5d8ec;
+      border-bottom: 1px solid #c5d8ec;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .esame-item:hover { background: #d0e4f4; }
+    .esame-item input[type="checkbox"] {
+      accent-color: #1a3a5c;
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .esame-item:nth-child(3n) { border-right: none; }
+
+    .nota-esami {
+      font-size: 12px;
+      font-style: italic;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      font-size: 11.5px;
+      color: #999;
+      font-style: italic;
+      padding-top: 8px;
+    }
+
+    /* ── Bottone stampa ── */
+    .btn-stampa {
+      display: block;
+      width: fit-content;
+      margin: 0 auto;
+      background: #1a3a5c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 13px 36px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: background 0.2s;
+    }
+    .btn-stampa:hover { background: #0f2440; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .btn-stampa { display: none; }
+      .container { max-width: 100%; }
+    }
+
+    @media (max-width: 560px) {
+      .griglia-esami { grid-template-columns: repeat(2, 1fr); }
+      .esame-item:nth-child(3n) { border-right: 1px solid #c5d8ec; }
+      .esame-item:nth-child(2n) { border-right: none; }
+      .titolo-box h1 { font-size: 19px; }
+      .si-no label { padding: 4px 8px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- AVVISO GIALLO -->
+  <div class="avviso">
+    <p>
+      <strong>⚠ Attenzione!</strong> Ai sensi della Legge 7 dicembre 2023 n. 193 (Disposizioni per la prevenzione
+      delle discriminazioni e la tutela dei diritti delle persone che sono state affette da malattie oncologiche),
+      si <strong>INVITA</strong> a rispondere <strong>NON considerando</strong> le eventuali patologie oncologiche
+      il cui trattamento attivo si sia concluso con guarigione, senza episodi di recidiva, da più di
+      <strong>10 anni</strong> alla data di compilazione del presente questionario (o <strong>5 anni</strong>
+      nel caso di patologia insorta prima dei 21 anni di età). Scarica la scheda informativa <u>Oblio Oncologico</u>.
+    </p>
+    <p>
+      Come previsto dal Decreto del Ministero della Salute del 22 marzo 2024 (GU n. 96 del 24/04/2024),
+      per determinate patologie oncologiche si applicano termini temporali ridotti. Elenco e termini sono
+      riportati nell'informativa sul diritto all'oblio oncologico presente sul sito <u>www.allianz.it</u>
+      e nella documentazione precontrattuale.
+    </p>
+    <p>
+      <strong>⚠ Attenzione!</strong> Ti ricordiamo che dopo la compilazione del questionario, le risposte date
+      <strong>non saranno modificabili</strong>. Per abilitare la modifica devi accedere alla pagina degli esiti.
+      Clicca su <em>Avanti</em> per accedere alla pagina degli esiti e poi sul tasto <em>Modifica</em>.
+    </p>
+  </div>
+
+  <!-- ANAGRAFICA -->
+  <div class="anagrafica">
+    <div class="anagrafica-row">
+      <div class="campo">
+        <label for="nome">Nome *</label>
+        <input type="text" id="nome" name="nome" autocomplete="given-name" />
+      </div>
+      <div class="campo">
+        <label for="cognome">Cognome *</label>
+        <input type="text" id="cognome" name="cognome" autocomplete="family-name" />
+      </div>
+      <div class="campo">
+        <label for="datanascita">Data di nascita *</label>
+        <input type="date" id="datanascita" name="datanascita" />
+      </div>
+    </div>
+    <div class="anagrafica-row" style="flex-wrap: nowrap;">
+      <div class="campo" style="flex: 1 1 50%;">
+        <label>Genere *</label>
+        <div class="radio-group">
+          <label><input type="radio" name="genere" value="M" /> Maschio</label>
+          <label><input type="radio" name="genere" value="F" /> Femmina</label>
+        </div>
+      </div>
+      <div class="campo" style="flex: 1 1 50%; border-right: none;">
+        <label>Negli ultimi 2 anni ha mai fumato? *</label>
+        <div class="radio-group">
+          <label><input type="radio" name="fumato" value="si" /> Sì</label>
+          <label><input type="radio" name="fumato" value="no" /> No</label>
+        </div>
+      </div>
+    </div>
+    <div class="anagrafica-row" style="flex-wrap: nowrap;">
+      <div class="campo" style="flex: 1 1 50%;">
+        <label for="altezza">Altezza (CM) *</label>
+        <input type="text" id="altezza" name="altezza" inputmode="numeric" maxlength="3" />
+      </div>
+      <div class="campo" style="flex: 1 1 50%; border-right: none;">
+        <label for="peso">Peso (KG) *</label>
+        <input type="text" id="peso" name="peso" inputmode="numeric" maxlength="4" />
+      </div>
+    </div>
+  </div>
+
+  <!-- TITOLO -->
+  <div class="titolo-box">
+    <h1>Questionario Sanitario Preliminare</h1>
+    <p>Raccolta informazioni prequalificative per polizze sanitarie</p>
+    <div class="separatore"></div>
+  </div>
+
+  <!-- DOMANDA 1 -->
+  <div class="domanda-block">
+    <div class="domanda-row grigio">
+      <div class="domanda-testo">
+        <strong>1.</strong>&nbsp; Soffre di qualche tipo di invalidità derivante da malattia o infortunio con esiti permanenti
+        superiori al 15%, o necessita di assistenza nello svolgimento delle attività quotidiane o percepisce o ha in corso
+        la richiesta o intende avviare pratiche per ottenere assegni o pensioni di invalidità riconosciuti da compagnie di
+        Assicurazione, INAIL, INPS o altri organi di previdenza e/o assistenza?
+      </div>
+      <div class="si-no">
+        <label><input type="radio" name="d1" value="si" /><span>Sì</span></label>
+        <label><input type="radio" name="d1" value="no" /><span>No</span></label>
+      </div>
+    </div>
+    <div class="campo-testo-risposta grigio">
+      <label>Indicare percentuale di invalidità se accertata e fornire i dettagli relativi alla sua condizione</label>
+      <textarea name="d1_dettaglio" rows="2" placeholder="Scrivi qui..."></textarea>
+    </div>
+  </div>
+
+  <!-- DOMANDA 2 -->
+  <div class="domanda-block">
+    <div class="domanda-row bianco">
+      <div class="domanda-testo">
+        <strong>2.</strong>&nbsp; Fa uso anche saltuario di sostanze stupefacenti, è mai stato in trattamento per abuso
+        di alcool o di sostanze stupefacenti, ha mai ricevuto diagnosi di tossicodipendenza o di alcolismo o di
+        patologie correlate ad uso di sostanze alcoliche?
+      </div>
+      <div class="si-no">
+        <label><input type="radio" name="d2" value="si" /><span>Sì</span></label>
+        <label><input type="radio" name="d2" value="no" /><span>No</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOMANDA 3 -->
+  <div>
+    <div class="sezione-titolo">
+      3. &nbsp;Le è mai stata diagnosticata, è stato o è attualmente in trattamento per qualche patologia?
+    </div>
+    <div class="domanda-block" style="margin-top: 6px;">
+      <div class="sottopunti">
+        <div class="domanda-row grigio">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie dell'apparato respiratorio</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3a" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3a" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row bianco">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie dell'apparato cardiocircolatorio</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3b" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3b" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row grigio">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie dell'apparato digerente o del fegato</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3c" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3c" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row bianco">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie del sistema nervoso centrale o periferico e organi di senso o disturbi mentali</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3d" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3d" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row grigio">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie del sistema endocrino e/o metabolico</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3e" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3e" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row bianco">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie del sistema urogenitale</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3f" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3f" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row grigio">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie del sangue</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3g" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3g" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row bianco">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie del connettivo o dell'apparato immunologico e osteoarticolare</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3h" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3h" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row grigio">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie dell'apparato visivo e/o uditivo</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3i" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3i" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row bianco">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Patologie della pelle</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3j" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3j" value="no" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="domanda-row grigio">
+          <div class="domanda-testo">&nbsp;&nbsp;&nbsp;Altre patologie</div>
+          <div class="si-no">
+            <label><input type="radio" name="d3k" value="si" /><span>Sì</span></label>
+            <label><input type="radio" name="d3k" value="no" /><span>No</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOMANDA 4 -->
+  <div class="domanda-block">
+    <div class="domanda-row grigio">
+      <div class="domanda-testo">
+        <strong>4.</strong>&nbsp; Escluse le condizioni precedentemente dichiarate, negli ultimi 10 anni è mai stato
+        ricoverato, anche in regime di day hospital, o prevede un prossimo ricovero?
+        <em>(ad esclusione degli interventi avvenuti da più di un mese con completa guarigione di:
+        appendicectomia, adenoidectomia, tonsillectomia, varicocele, fimosi, emorroidectomia,
+        frattura degli arti, chirurgia estetica, settoplastica nasale, correzione alluce valgo, parto, estrazione dentale)</em>
+      </div>
+      <div class="si-no">
+        <label><input type="radio" name="d4" value="si" /><span>Sì</span></label>
+        <label><input type="radio" name="d4" value="no" /><span>No</span></label>
+      </div>
+    </div>
+    <div class="campo-testo-risposta grigio">
+      <label>Indicare il motivo del ricovero / patologia</label>
+      <textarea name="d4_dettaglio" rows="2" placeholder="Scrivi qui..."></textarea>
+    </div>
+  </div>
+
+  <!-- DOMANDA 5 -->
+  <div class="domanda-block">
+    <div class="domanda-row bianco">
+      <div class="domanda-testo">
+        <strong>5.</strong>&nbsp; Escluse le condizioni precedentemente dichiarate, nell'ultimo anno si è sottoposto
+        ad indagini diagnostiche o esami specialistici che abbiano dato esiti anomali o è in attesa di ricevere gli
+        esiti di esami a cui si è sottoposto o ha in programma di sottoporsi ad esami specialistici
+        <em>(esclusi check-up o esami di screening regolari)?</em>
+      </div>
+      <div class="si-no">
+        <label><input type="radio" name="d5" value="si" /><span>Sì</span></label>
+        <label><input type="radio" name="d5" value="no" /><span>No</span></label>
+      </div>
+    </div>
+    <div class="campo-testo-risposta bianco">
+      <p class="nota-esami">Se Sì, indicare quali esami:</p>
+      <div class="griglia-esami">
+        <label class="esame-item"><input type="checkbox" name="esame_agoaspirato" /> Agoaspirato</label>
+        <label class="esame-item"><input type="checkbox" name="esame_angiotac" /> Angio TAC</label>
+        <label class="esame-item"><input type="checkbox" name="esame_angiografia" /> Angiografia</label>
+        <label class="esame-item"><input type="checkbox" name="esame_biopsia" /> Biopsia</label>
+        <label class="esame-item"><input type="checkbox" name="esame_breathtest" /> Breath test Urea</label>
+        <label class="esame-item"><input type="checkbox" name="esame_colonscopia" /> Colonscopia</label>
+        <label class="esame-item"><input type="checkbox" name="esame_ecgsforzo" /> ECG da sforzo</label>
+        <label class="esame-item"><input type="checkbox" name="esame_ecocardiogramma" /> Ecocardiogramma</label>
+        <label class="esame-item"><input type="checkbox" name="esame_ecg" /> Elettrocardiogramma</label>
+        <label class="esame-item"><input type="checkbox" name="esame_endoscopia" /> Endoscopia</label>
+        <label class="esame-item"><input type="checkbox" name="esame_feci" /> Esame delle feci</label>
+        <label class="esame-item"><input type="checkbox" name="esame_urine" /> Esame delle urine</label>
+        <label class="esame-item"><input type="checkbox" name="esame_sangue" /> Esami del sangue</label>
+        <label class="esame-item"><input type="checkbox" name="esame_gastroscopia" /> Gastroscopia</label>
+        <label class="esame-item"><input type="checkbox" name="esame_laparoscopia" /> Laparoscopia</label>
+        <label class="esame-item"><input type="checkbox" name="esame_mammografia" /> Mammografia</label>
+        <label class="esame-item"><input type="checkbox" name="esame_paptest" /> Pap-Test</label>
+        <label class="esame-item"><input type="checkbox" name="esame_raggix" /> Raggi X</label>
+        <label class="esame-item"><input type="checkbox" name="esame_risonanza" /> Risonanza magnetica</label>
+        <label class="esame-item"><input type="checkbox" name="esame_hiv" /> Test HIV</label>
+        <label class="esame-item"><input type="checkbox" name="esame_pet" /> Tomografia a emissione di positroni</label>
+        <label class="esame-item"><input type="checkbox" name="esame_tac" /> Tomografia computerizzata</label>
+        <label class="esame-item"><input type="checkbox" name="esame_ultrasuoni" /> Ultrasuoni</label>
+        <label class="esame-item"><input type="checkbox" name="esame_altri" /> Altri test</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOMANDA 6 -->
+  <div class="domanda-block">
+    <div class="domanda-row grigio">
+      <div class="domanda-testo">
+        <strong>6.</strong>&nbsp; Escluse le condizioni precedentemente dichiarate, nell'ultimo anno ha sofferto o
+        soffre di qualche disturbo persistente e ancora privo di diagnosi?
+        <em>(ad esempio: dolori al petto, stipsi ostinata, sangue nelle feci, tosse o mal di testa persistenti,
+        svenimenti, noduli, tumefazioni, rigonfiamenti, variazioni di peso di oltre 10 kg o altri disturbi persistenti)</em>
+      </div>
+      <div class="si-no">
+        <label><input type="radio" name="d6" value="si" /><span>Sì</span></label>
+        <label><input type="radio" name="d6" value="no" /><span>No</span></label>
+      </div>
+    </div>
+    <div class="campo-testo-risposta grigio">
+      <label>Descrivere il disturbo / indicare la patologia</label>
+      <textarea name="d6_dettaglio" rows="2" placeholder="Scrivi qui..."></textarea>
+    </div>
+  </div>
+
+  <!-- DOMANDA 7 -->
+  <div class="domanda-block">
+    <div class="domanda-row bianco">
+      <div class="domanda-testo">
+        <strong>7.</strong>&nbsp; Sta attualmente seguendo cure farmacologiche continuative o per patologie in fase acuta?
+      </div>
+      <div class="si-no">
+        <label><input type="radio" name="d7" value="si" /><span>Sì</span></label>
+        <label><input type="radio" name="d7" value="no" /><span>No</span></label>
+      </div>
+    </div>
+    <div class="campo-testo-risposta bianco">
+      <label>Indicare quali farmaci sta assumendo (nome del farmaco o principio attivo) e dosaggio</label>
+      <textarea name="d7_dettaglio" rows="2" placeholder="Scrivi qui..."></textarea>
+    </div>
+  </div>
+
+  <!-- BOTTONE STAMPA -->
+  <button class="btn-stampa" onclick="window.print()">
+    🖨&nbsp; Stampa / Salva come PDF
+  </button>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Documento ad uso interno preliminare – raccolta informazioni prequalificative per polizze sanitarie.
+  </div>
+
+</div>
+</body>
+</html>
